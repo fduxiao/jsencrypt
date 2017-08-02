@@ -8,7 +8,7 @@
 <body>
 <div class="row">
   <div class="panel panel-default">
-    <div class="panel-heading"><h1>Online RSA Key Generator</h1></div>
+    <div class="panel-heading"><h1>HTML RSA Key Generator</h1></div>
     <div class="panel-body">
       <div class="col-lg-2">
         <div class="btn-group">
@@ -40,9 +40,18 @@
             </small>
           </div>
           <div class="col-lg-6">
-            <label for="pubkey">Public Key</label><br/>
+            <label for="pubkey">Corresponding Public Key</label><br/>
             <small><textarea id="pubkey" rows="15" style="width:100%" readonly="readonly"></textarea></small>
           </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-lg-6">
+              <label for="encryptkey">Encrypting Key</label><br/>
+              <small>
+                <textarea id="encryptkey" rows="6" style="width:100%"></textarea>
+              </small>
+            </div>
         </div>
       </div>
     </div>
@@ -50,23 +59,48 @@
 </div>
 <div class="row">
   <div class="panel panel-default">
-    <div class="panel-heading"><h3>RSA Encryption Test</h3></div>
+    <div class="panel-heading"><h3>Decryption Section</h3></div>
     <div class="panel-body">
       <div class="col-lg-5">
-        <label for="input">Text to encrypt:</label><br/>
-        <textarea id="input" name="input" style="width: 100%" rows="4">This is a test!</textarea>
+        <label for="ciphertext">Ciphertext:</label><br/>
+        <textarea id="ciphertext" name="ciphertext" style="width: 100%" rows="4"></textarea>
       </div>
+
       <div class="col-lg-2">
         <label>&nbsp;</label><br/>
-        <button id="execute" class="btn btn-primary">Encrypt / Decrypt</button>
+        <button id="decrypt" class="btn btn-primary">Decrypt</button>
       </div>
+
       <div class="col-lg-5">
-        <label for="crypted">Encrypted:</label><br/>
-        <textarea id="crypted" name="crypted" style="width: 100%" rows="4"></textarea>
+        <label for="decrypted">Decrypted Text:</label><br/>
+        <textarea id="decrypted" name="decrypted" style="width: 100%" rows="4"></textarea>
       </div>
     </div>
   </div>
 </div>
+
+<div class="row">
+  <div class="panel panel-default">
+    <div class="panel-heading"><h3>Encryption Section</h3></div>
+    <div class="panel-body">
+      <div class="col-lg-5">
+        <label for="text">Text:</label><br/>
+        <textarea id="text" name="text" style="width: 100%" rows="4">This is a test!</textarea>
+      </div>
+
+      <div class="col-lg-2">
+        <label>&nbsp;</label><br/>
+        <button id="encrypt" class="btn btn-primary">Encrypt</button>
+      </div>
+
+      <div class="col-lg-5">
+        <label for="encrypted">Encrypted Text:</label><br/>
+        <textarea id="encrypted" name="encrypted" style="width: 100%" rows="4"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="jquery.min.js"></script>
 <script src="jsencrypt.min.js"></script>
 <script src="bootstrap.min.js"></script>
@@ -85,8 +119,8 @@
       });
     });
 
-    // Execute when they click the button.
-    $('#execute').click(function () {
+    // Decrypt when they click the button.
+    $('#decrypt').click(function () {
 
       // Create the encryption object.
       var crypt = new JSEncrypt();
@@ -94,28 +128,33 @@
       // Set the private.
       crypt.setPrivateKey($('#privkey').val());
       //return;
-      // If no public key is set then set it here...
-      var pubkey = $('#pubkey').val();
-      if (!pubkey) {
-        $('#pubkey').val(crypt.getPublicKey());
-      }
-
       // Get the input and crypted values.
-      var input = $('#input').val();
-      var crypted = $('#crypted').val();
+      var ciphertext = $('#ciphertext').val();
 
       // Alternate the values.
-      if (input) {
-        $('#crypted').val(crypt.encrypt(input));
-        $('#input').val('');
+      if (ciphertext) {
+        var decrypted = crypt.decrypt(ciphertext);
+        $('#decrypted').val(decrypted);
+        $('#ciphertext').val('');
       }
-      else if (crypted) {
-        var decrypted = crypt.decrypt(crypted);
-        if (!decrypted)
-          decrypted = 'This is a test!';
-        $('#input').val(decrypted);
-        $('#crypted').val('');
-      }
+    });
+
+    $('#encrypt').click(function(){
+        // Create the encryption object.
+        var crypt = new JSEncrypt();
+
+        // Set the public.
+        crypt.setPublicKey($('#encryptkey').val());
+        //return;
+        // Get the input and decrypted values.
+        var text = $('#text').val();
+
+        // Alternate the values.
+        if (text) {
+          var crypted = crypt.encrypt(text);
+          $('#encrypted').val(crypted);
+          $('#text').val('');
+        }
     });
 
     var generateKeys = function () {
@@ -138,6 +177,7 @@
           $('#time-report').text('Generated in ' + time + ' ms');
           $('#privkey').val(crypt.getPrivateKey());
           $('#pubkey').val(crypt.getPublicKey());
+          $('#encryptkey').val(crypt.getPublicKey());
         });
         return;
       }
@@ -147,6 +187,7 @@
       $('#time-report').text('Generated in ' + time + ' ms');
       $('#privkey').val(crypt.getPrivateKey());
       $('#pubkey').val(crypt.getPublicKey());
+      $('#encryptkey').val(crypt.getPublicKey());
     };
 
     // If they wish to generate new keys.
